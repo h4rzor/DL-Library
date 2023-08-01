@@ -17,12 +17,13 @@ class Tensor:
 
     @property
     def shape(self):
-        rows = len(self.data)
-        if rows == 0:
-            cols = 0
-        else:
-            cols = len(self.data[0])
-        return rows, cols
+        if isinstance(self.data, (int, float)):
+            return (len(self.data))
+        elif isinstance([self.data], list):
+            if all(isinstance(item, (int, float)) for item in self.data):
+                return (len(self.data), 0)
+            else:
+                return (len(self.data), len(self.data[0]))
 
     def __getitem__(self, key):
         return self.data[key]
@@ -31,9 +32,6 @@ class Tensor:
         self.data[key] = value
     
     def __add__(self, other):
-        result = self.isinstance_int(self, other)
-        if result:
-            return self.data + other.data
 
         assert len(self.data) == len(other.data)
         return Tensor([e1 + e2 for e1, e2 in zip(self.data, other.data)])
@@ -41,6 +39,12 @@ class Tensor:
     def __mul__(self, other):
         if isinstance(self.data, int) and isinstance(other.data, int):
             return self.data * other.data
+
+        elif isinstance(other, int):
+            return list([elem * other for elem in self.data])
+        
+        elif isinstance(self, int):
+            return list([elem * self for elem in other.data]) 
 
 
         self_res = all(isinstance(ele, list) for ele in self.data)
@@ -59,6 +63,9 @@ class Tensor:
         return np.transpose(self)
 
     def __sub__(self, other):
+        if isinstance(other, int):
+            return list([elem - other for elem in self.data])
+
         self_res = all(isinstance(ele, list) for ele in self.data)
         other_res = all(isinstance(ele, list) for ele in other.data)
         
@@ -73,6 +80,10 @@ class Tensor:
 
             if row1 == row2 and col1 == col2:
                 return Tensor(np.subtract(self.data, other.data))
+    
+    def __rsub__(self, other):
+        if isinstance(other, int):
+            return list([elem - other for elem in self.data])
 
     def __truediv__(self, other):
         if isinstance(self.data, int) and isinstance(other.data, int):
