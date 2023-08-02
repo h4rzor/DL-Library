@@ -13,8 +13,12 @@ c = Tensor([1,2,3,2,1,32,4,5,2,4])
 d = Tensor([4,4,8,3,6,3])
 
 d = Tensor([1,2,3,0,-1,-4,6])
+tensor = randint(1,6,(4,1))
+
+tensor = Tensor([[1,6,12]
+                ,[23,2,20],
+                 [21,5,3]]) 
 
 
-res = relu(d)
-#Activation kinda works only for 1D and 2D for now
+res = softmax(tensor, 1)
 print(res)

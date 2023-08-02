@@ -19,14 +19,31 @@ class Tensor:
     def shape(self):
         if isinstance(self.data, (int, float)):
             return (len(self.data))
-        elif isinstance([self.data], list):
-            if all(isinstance(item, (int, float)) for item in self.data):
+        elif isinstance(self.data, list):
+            if isinstance(self.data[0], (int, float)):
                 return (len(self.data), 0)
-            else:
+            elif all(isinstance(row, list) for row in self.data):
                 return (len(self.data), len(self.data[0]))
 
-    def __getitem__(self, key):
-        return self.data[key]
+    def __getitem__(self, index):
+        if isinstance(index, tuple):
+            row_index, col_index = index
+            if isinstance(row_index, int) and isinstance(col_index, int):
+                return self.data[row_index][col_index]
+
+            elif isinstance(row_index, slice) and isinstance(col_index, slice):
+                if row_index.start is None and row_index.stop is None and row_index.step is None \
+                        and col_index.start is None and col_index.stop is None and col_index.step is None:
+                            return self.data[:]
+                else:
+                    return [row[col_index] for row in self.data[row_index]]
+
+            elif isinstance(row_index, int) and isinstance(col_index, slice):
+                return self.data[row_index][col_index]
+            elif isinstance(row_index, slice) and isinstance(col_index, int):
+                return [row[col_index] for row in self.data[row_index]]
+        else:
+            return self.data[index]
 
     def __setitem__(self, key, value):
         self.data[key] = value
@@ -100,3 +117,14 @@ class Tensor:
 
             if row1 == row2 and col1 == col2:
                 return Tensor(np.divide(self.data, other.data))
+    
+    def __iadd__(self, other):
+        if isinstance(other, Tensor):
+            self.data += other.data
+        elif isinstance(other, (int, float)):
+            self.data += other
+        return self
+    
+    def __radd__(self, other):
+        if isinstance(other, (int, float)):
+            return Tensor(self.data + other)

@@ -1,8 +1,8 @@
 import math 
 import numpy as np
+import random
 from typing import Tuple
 from tensor import Tensor
-import random
 
 # Helper functions
 def _make_matrix(rows, cols, value):
@@ -13,7 +13,29 @@ def _make_matrix(rows, cols, value):
         for j in range(cols):
             row.append(value)
         matrix.append(row)
-    return Tensor(matrix)
+    return matrix
+
+def _exp_scalar(tensor):
+    return math.exp(tensor)
+
+def _exp_vector(tensor):
+    res = []
+    for value in tensor:
+        if isinstance(value, list):
+            for el in value:
+                res.append(math.exp(el))
+            return res
+        else:
+            res.append(math.exp(value))
+    return Tensor(res)
+
+def _exp_matrix(tensor: Tensor):
+    rows, cols = tensor.shape
+    res = zeros_like(tensor)
+    for i in range(rows):
+        for j in range(cols):
+            res[i][j] = exp(tensor[i][j])
+    return res
 
 #Functions
 
@@ -44,7 +66,7 @@ def randint(start, end, shape: Tuple[int, int]) -> "Tensor":
         for j in range(cols):
             value = random.randint(start, end)
             matrix[i][j] = value
-    return Tensor(matrix)
+    return matrix
 
 
 def normal(shape: Tuple[int, int]):
@@ -73,11 +95,12 @@ def argmax(tensor: Tensor):
     cloned = tensor[:]
     max_number = -math.inf
     index = 0
-    if tensor.shape[1] == 0:
+    if tensor.shape[1] == 0 or tensor.shape[1] == 1:
         for i in range(len(cloned)):
-            if cloned[i] > max_number:
-                max_number = cloned[i]
-                index = i
+            if isinstance(cloned[i], list) and len(cloned[i]) == 1:
+                if cloned[i][0] > max_number:
+                    max_number = cloned[i][0]
+                    index = i
         return index
 
 def argmin(tensor: Tensor):
@@ -90,3 +113,31 @@ def argmin(tensor: Tensor):
                 min_number = cloned[i]
                 index = i
     return index
+
+
+def sum_tensor(tensor: Tensor, dim):
+    rows, cols = tensor.shape
+    if dim == 0:
+        sum_cols = []
+        for i in range(rows):
+            sum_cols.append(sum(tensor[:, i]))
+            #the magic happens here :)
+        return Tensor(sum_cols)
+    else:
+        sum_rows = []
+        for i in range(cols):
+            sum_rows.append(sum(tensor[i, :]))
+        return Tensor(sum_rows)
+
+
+def exp(tensor):
+    if isinstance(tensor, int):
+        res = _exp_scalar(tensor)
+        return res
+    elif isinstance(tensor, list) and len(tensor.shape) == 1:
+        res = _exp_vector(tensor)
+        return res
+    else:
+        res = _exp_matrix(tensor)
+        return res
+        
