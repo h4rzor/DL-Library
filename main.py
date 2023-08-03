@@ -17,8 +17,19 @@ tensor = randint(1,6,(4,1))
 
 tensor = Tensor([[1,6,12]
                 ,[23,2,20],
-                 [21,5,3]]) 
+                 [21,5,3]])
 
 
-res = softmax(tensor, 1)
-print(res)
+'''a = Tensor(6)
+b = Tensor(5)
+
+res = a + b
+print(res._op)
+prev = list(res._prev)
+print(prev[0])
+print(prev[1])'''
+
+a = Tensor(0, (), "")
+b = Tensor(2, (), "")
+print(a.shape)
+print(b.shape)

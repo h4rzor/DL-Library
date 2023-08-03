@@ -6,8 +6,12 @@ import random
 
 
 class Tensor:
-    def __init__(self, data):
-        self.data = data 
+    def __init__(self, data, _children=(), _op=""):
+        self.data = data
+        self.grad = 0
+        self._backward = lambda: None
+        self._prev = set(_children)
+        self._op = _op
 
     def __str__(self):
         return f"Tensor({self.data})"
@@ -18,7 +22,7 @@ class Tensor:
     @property
     def shape(self):
         if isinstance(self.data, (int, float)):
-            return (len(self.data))
+            return 0
         elif isinstance(self.data, list):
             if isinstance(self.data[0], (int, float)):
                 return (len(self.data), 0)
@@ -49,9 +53,21 @@ class Tensor:
         self.data[key] = value
     
     def __add__(self, other):
+        if isinstance(self, int):
+            return Tensor(self + other.data, (self, other), "+")
+        elif isinstance(other, int):
+            return Tensor(self.data + other, (self, other), "+")
+        elif isinstance(self.data, int) and isinstance(other.data, int):
+            return Tensor(self.data + other.data, (self, other), "+")
 
-        assert len(self.data) == len(other.data)
-        return Tensor([e1 + e2 for e1, e2 in zip(self.data, other.data)])
+        self_res = all(isinstance(ele, list) for ele in self.data)
+        other_res = all(isinstance(ele, list) for ele in other.data)
+        if not self_res and not other_res and len(self.data) == len(other.data):
+            return Tensor(np.array(self.data) * np.array(other.data), (self, other), "+")
+        
+        if len(self.data) == len(other.data) and len(self.data[0]) == len(other.data[0]):
+            return Tensor(np.add(self.data, other.data), (self, other), "+")
+            
     
     def __mul__(self, other):
         if isinstance(self.data, int) and isinstance(other.data, int):
@@ -70,7 +86,7 @@ class Tensor:
             return Tensor(np.array(self.data) * np.array(other.data))
 
         if len(self.data) == len(other.data) and len(self.data[0]) == len(other.data[0]):
-            return Tensor(np.multiply(self.data, other.data))
+            return Tensor(np.multiply(self.data, other.data), (self, other), "*")
 
     def __matmul__(self, other):
         if self.shape[1] == other.shape[0]:
@@ -127,4 +143,4 @@ class Tensor:
     
     def __radd__(self, other):
         if isinstance(other, (int, float)):
-            return Tensor(self.data + other)
+            return Tensor(self.data + other, (self, other), "+")
