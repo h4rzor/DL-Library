@@ -23,10 +23,10 @@ class Tensor:
     def shape(self):
         if isinstance(self.data, (int, float)):
             return 0
-        elif isinstance(self.data, list):
+        elif isinstance(self.data, list) or isinstance(self.data, np.ndarray):
             if isinstance(self.data[0], (int, float)):
                 return (len(self.data), 0)
-            elif all(isinstance(row, list) for row in self.data):
+            elif all(isinstance(row, list) or (isinstance(row, np.ndarray)) for row in self.data):
                 return (len(self.data), len(self.data[0]))
 
     def __getitem__(self, index):

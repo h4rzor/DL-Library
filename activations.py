@@ -63,9 +63,23 @@ def tanh(tensor):
 
 def relu(tensor: Tensor):
     res = []
-    for value in tensor:
-        if value <= 0:
-            res.append(0)
-            continue
-        res.append(value)
-    return Tensor(res)
+    is_matrix = True
+    for row in tensor:
+        if not isinstance(row, np.ndarray):
+            return False
+    if is_matrix:
+        res_matrix = zeros_like(tensor)
+        for i in range(tensor.shape[0]):
+            for j in range(tensor.shape[1]):
+                if tensor[i][j] <= 0:
+                    res_matrix[i][j] = 0
+                else:
+                    res_matrix[i][j] = tensor[i][j]
+        return res_matrix
+    else:
+        for value in tensor:
+            if value <= 0:
+                res.append(0)
+                continue
+            res.append(value)
+        return Tensor(res)

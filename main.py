@@ -3,6 +3,7 @@ from tensor import Tensor
 import numpy as np 
 import matplotlib.pyplot as plt 
 from activations import *
+from network import Neuron
 
 
 
@@ -29,7 +30,9 @@ prev = list(res._prev)
 print(prev[0])
 print(prev[1])'''
 
-a = Tensor(0, (), "")
-b = Tensor(2, (), "")
-print(a.shape)
-print(b.shape)
+
+neuron = Neuron(3)
+x = Tensor([[1,2,3]])
+res = neuron(x)
+print(res)
+print(res.shape)
