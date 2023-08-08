@@ -6,12 +6,14 @@ import random
 
 
 class Tensor:
-    def __init__(self, data, _children=(), _op=""):
+    def __init__(self, data, _children=(), _op="", label=""):
         self.data = data
         self.grad = 0
         self._backward = lambda: None
         self._prev = set(_children)
         self._op = _op
+        self.grad = 0
+        self.label = label
 
     def __str__(self):
         return f"Tensor({self.data})"
@@ -53,12 +55,23 @@ class Tensor:
         self.data[key] = value
     
     def __add__(self, other):
+        #out = Tensor(0, (), "")
         if isinstance(self, int):
             return Tensor(self + other.data, (self, other), "+")
         elif isinstance(other, int):
             return Tensor(self.data + other, (self, other), "+")
         elif isinstance(self.data, int) and isinstance(other.data, int):
             return Tensor(self.data + other.data, (self, other), "+")
+        elif isinstance(self.data, float) or isinstance(other.data, float):
+            out = Tensor(self.data + other.data, (self, other), "+")
+            def _backward():
+                self.grad += 1 * out.grad 
+                other.grad += 1 * out.grad
+            out._backward = _backward
+            return out
+
+        
+
 
         self_res = all(isinstance(ele, list) for ele in self.data)
         other_res = all(isinstance(ele, list) for ele in other.data)
@@ -72,13 +85,21 @@ class Tensor:
     def __mul__(self, other):
         if isinstance(self.data, int) and isinstance(other.data, int):
             return self.data * other.data
-
-        elif isinstance(other, int):
+        elif isinstance(other.data, int):
             return list([elem * other for elem in self.data])
-        
-        elif isinstance(self, int):
+        elif isinstance(self.data, int):
             return list([elem * self for elem in other.data]) 
+        elif isinstance(self.data, float) or isinstance(other.data, float):
+            out = Tensor(self.data * other.data, (self, other), "*")
+            def _backward():
+                self.grad += other.data * out.grad
+                other.grad += self.data * out.grad
 
+            out._backward = _backward
+            return out
+
+
+        
 
         self_res = all(isinstance(ele, list) for ele in self.data)
         other_res = all(isinstance(ele, list) for ele in other.data)
@@ -144,3 +165,18 @@ class Tensor:
     def __radd__(self, other):
         if isinstance(other, (int, float)):
             return Tensor(self.data + other, (self, other), "+")
+    
+    def backward(self):
+        topo = []
+        visited = set()
+        def build_topo(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v._prev:
+                    build_topo(child)
+                topo.append(v)
+        build_topo(self)
+
+        self.grad = 1.0
+        for node in reversed(topo):
+            node._backward()
