@@ -17,21 +17,15 @@ class Module:
 
 class Neuron(Module):
     def __init__(self, n_inputs, activation=True):
-        self.weight = [normal((n_inputs, 1)) for _ in range(n_inputs)]
+        self.weight = [Tensor(random.uniform(-1,1)) for _ in range(n_inputs)]
         self.bias = Tensor(1)
         self.activation = activation 
     
     def __call__(self, x):
-        res = []
+        res = Tensor(0, (), "")
         for wi, xi in zip(self.weight, x):
-            wi = np.array(wi)
-            xi = np.expand_dims(np.array(xi), 0)
-            res.append(wi * xi)
-        bias = np.array(self.bias.data)
-        res = np.add(res, bias).squeeze(0)
-        res = Tensor(res, (), "")
-        
-        act = relu(res) if self.activation else act
+            res += (wi.data * xi)
+        act = relu(res) if self.activation else res
         return act
     
     def parameters(self):

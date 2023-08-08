@@ -62,6 +62,12 @@ def tanh(tensor):
 
 
 def relu(tensor: Tensor):
+    if isinstance(tensor, Tensor):
+        if isinstance(tensor.data, float) or isinstance(tensor.data, int):
+            if tensor.data <= 0:
+                return 0
+            else:
+                return tensor.data
     res = []
     is_matrix = True
     for row in tensor:

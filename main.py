@@ -35,7 +35,8 @@ print(prev[1])'''
 res = neuron(x)
 layer = Layer(7, 5)
 result = layer(x)'''
-x = Tensor([[1,2,3]])
+x = Tensor([1,2,3])
 nouts = [4, 4, 1]
 mlp = MLP(3, nouts)
 res = mlp(x)
+print(res)
