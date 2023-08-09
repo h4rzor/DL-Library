@@ -130,8 +130,8 @@ def sum_tensor(tensor: Tensor, dim):
         return Tensor(sum_rows)
 
 
-def exp(tensor):
-    if isinstance(tensor, int):
+def exp(tensor: Tensor):
+    if isinstance(tensor.data, int) or isinstance(tensor.data, int):
         res = _exp_scalar(tensor)
         return res
     elif isinstance(tensor, list) and len(tensor.shape) == 1:

@@ -40,22 +40,86 @@ result = layer(x)
 x = Tensor([1,2,3])
 nouts = [4, 4, 1]
 mlp = MLP(3, nouts)
-res = mlp(x) '''
+res = mlp(x) 
 
-a = Tensor(2.0, (), "", "a")
-b = Tensor(-3.0, (), "", "b")
-c = Tensor(10.0, (), "", "c")
-e = a*b; e.label = "e"
-d = e + c; d.label = "d"
-f = Tensor(-2.0, (), "", "f")
-L = d * f; L.label = "L"
 
-L.backward()
 
-print(f.grad, d.data) 
-print(d.grad, f.data) 
+'''
 
-print(e.grad, d.grad * 1) 
-print(c.grad, d.grad * 1) 
-print(a.grad, b.data * e.grad) 
-print(b.grad, a.data * e.grad) 
+x1 = Tensor(2.0, (), "", "x1")
+x2 = Tensor(0.0, (), "", "x2")
+
+w1 = Tensor(-3.0, (), "", "w1")
+w2 = Tensor(1.0, (), "", "w2")
+
+bias = Tensor(6.88, (), "", "bias")
+
+x1w1 = x1 * w1
+x2w2 = x2 * w2
+
+x1w1x2w2 = x1w1 + x2w2
+n = x1w1x2w2 + bias
+o = n.tanh()
+o.backward()
+
+print(o.grad)
+print(n.grad)
+print(x1w1x2w2.grad)
+print(x2w2.grad)
+print(x1w1.grad)
+print(bias.grad)
+print(w2.grad)
+print(w1.grad)
+print(x2.grad)
+print(x1.grad)
+
+
+
+
+
+
+'''
+xs = Tensor([
+  [2.0, 3.0, -1.0],
+  [3.0, -1.0, 0.5],
+  [0.5, 1.0, 1.0],
+  [1.0, 1.0, -1.0],
+])
+ys = Tensor([1.0, -1.0, -1.0, 1.0]) # desired targets
+
+
+#x = Tensor([2.0, 3.0, -1.0])
+mlp = MLP(3, [4,4,1])
+#res = mlp(x) 
+#print(res)
+#forward pass
+for _ in range(100):
+    ypred = [mlp(n) for n in xs]
+    
+    loss = sum((y_true - y_pred.data)**2 for y_true, y_pred in zip(ys, ypred))
+
+    for p in mlp.parameters():
+        p.grad = 0.0
+
+    for y_pred in ypred:
+        y_pred.backward()
+
+    for p in mlp.parameters():
+        p.data += -0.01 * p.grad 
+    
+
+
+for i in range(100):
+    x = [2.0, 3.0, -1.0]
+    mlp = MLP(3, [4, 4, 1])
+    output = mlp(x)
+    target = Tensor(3.6, (), "","")
+
+    loss = Tensor((target.data - output.data) ** 2, (target, output), "","")
+    print(loss)
+    for n in mlp.parameters():
+        n.grad = 0.0
+    loss.backward()
+
+    for n in mlp.parameters():
+        n.data += -0.0001 * n.grad '''

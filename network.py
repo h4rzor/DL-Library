@@ -29,7 +29,7 @@ class Neuron(Module):
         return act
     
     def parameters(self):
-        return self.w + [self.bias]
+        return self.weight + [self.bias]
 
 
 class Layer(Module):
