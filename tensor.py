@@ -82,14 +82,8 @@ class Tensor:
             
     
     def __mul__(self, other):
-        if isinstance(self.data, int) and isinstance(other.data, int):
-            return self.data * other.data
-        elif isinstance(other.data, int):
-            return list([elem * other for elem in self.data])
-        elif isinstance(self.data, int):
-            return list([elem * self for elem in other.data]) 
-        elif isinstance(self.data, float) or isinstance(other.data, float):
-            out = Tensor(self.data * other.data, (self, other), "*")
+        if isinstance(self.data, float) or isinstance(other.data, float):
+            out = Tensor(self.data * other.data, (self, other), "*", "")
             def _backward():
                 self.grad += other.data * out.grad
                 other.grad += self.data * out.grad
@@ -97,8 +91,13 @@ class Tensor:
             out._backward = _backward
             return out
 
+        elif isinstance(self.data, int) and isinstance(other.data, int):
+            return self.data * other.data
+        elif isinstance(other.data, int):
+            return list([elem * other for elem in self.data])
+        elif isinstance(self.data, int):
+            return list([elem * self for elem in other.data]) 
 
-        
 
         self_res = all(isinstance(ele, list) for ele in self.data)
         other_res = all(isinstance(ele, list) for ele in other.data)
@@ -116,16 +115,24 @@ class Tensor:
         return np.transpose(self)
 
     def __sub__(self, other):
-        if isinstance(self.data, float) and isinstance(other.data, float):
-            return Tensor(self.data - other.data, (self, other), "","")
+        if isinstance(self, Tensor) and isinstance(other, int) or isinstance(other, float):
+            return Tensor(self.data - other, (self, other), "", "")        
+
         if isinstance(other, int):
             return list([elem - other for elem in self.data])
+        if isinstance(self.data, float) and isinstance(other.data, float):
+            return Tensor(self.data - other.data, (self, other), "","")
 
+        if isinstance(self.data, int) and isinstance(other.data, float) or isinstance(self.data, float) and isinstance(other.data, int):
+            return Tensor(self.data - other.data, (self, other), "", "-")
+        
+        
+
+        
         self_res = all(isinstance(ele, list) for ele in self.data)
         other_res = all(isinstance(ele, list) for ele in other.data)
         
-        if isinstance(self.data, int) and isinstance(other.data, int):
-            return self.data - other.data
+        
 
         if not self_res and not other_res:
             return Tensor(np.subtract(self.data, other.data))
@@ -188,10 +195,12 @@ class Tensor:
         
     def tanh(self):
         if isinstance(self.data, float) or isinstance(self.data, int):
-            out = Tensor((math.exp(self.data) - math.exp(-self.data)) / ((math.exp(self.data) + math.exp(-self.data))), (self, ), "", "")
+            out = Tensor((math.exp(self.data) - math.exp(-self.data)) / ((math.exp(self.data) + math.exp(-self.data))), (self, ), "", "tanh")
+
+            t = (math.exp(2*self.data) - 1)/(math.exp(2*self.data) + 1)
 
             def _backward():
-                self.grad += (1 - self.data ** 2) * out.grad
+                self.grad += (1 - t ** 2) * out.grad
             out._backward = _backward
             return out
             
@@ -200,6 +209,18 @@ class Tensor:
             for i in self.data:
                 out.append((math.exp(i) - math.exp(-i)) / (math.exp(i) + math.exp(-i)))
             return Tensor(out)
+    
+    def __pow__(self, other):
+        if isinstance(self.data, int) or isinstance(self.data, float):
+            if isinstance(other, Tensor):
+                if isinstance(other.data, int) or isinstance(other.data, float):
+                    out = Tensor(self.data ** other.data, (self, other), "", "pow")
+
+                    def _backward():
+                        self.grad += other * (self.data ** (other - 1)) * out.grad
+                    out._backward = _backward
+                    return out
+
 
     def relu(self):
         if isinstance(self, Tensor):

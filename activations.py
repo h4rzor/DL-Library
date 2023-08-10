@@ -65,9 +65,9 @@ def relu(tensor: Tensor):
     if isinstance(tensor, Tensor):
         if isinstance(tensor.data, float) or isinstance(tensor.data, int):
             if tensor.data <= 0:
-                return 0
+                return Tensor(0, (tensor, ), "", "")
             else:
-                return tensor.data
+                return Tensor(tensor.data, (tensor, ), "","")
     res = []
     is_matrix = True
     for row in tensor:

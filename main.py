@@ -44,8 +44,6 @@ res = mlp(x)
 
 
 
-'''
-
 x1 = Tensor(2.0, (), "", "x1")
 x2 = Tensor(0.0, (), "", "x2")
 
@@ -60,25 +58,11 @@ x2w2 = x2 * w2
 x1w1x2w2 = x1w1 + x2w2
 n = x1w1x2w2 + bias
 o = n.tanh()
-o.backward()
-
-print(o.grad)
-print(n.grad)
-print(x1w1x2w2.grad)
-print(x2w2.grad)
-print(x1w1.grad)
-print(bias.grad)
-print(w2.grad)
-print(w1.grad)
-print(x2.grad)
-print(x1.grad)
+o.backward() '''
 
 
 
 
-
-
-'''
 xs = Tensor([
   [2.0, 3.0, -1.0],
   [3.0, -1.0, 0.5],
@@ -87,6 +71,24 @@ xs = Tensor([
 ])
 ys = Tensor([1.0, -1.0, -1.0, 1.0]) # desired targets
 
+
+mlp = MLP(3, [4,4,1])
+
+y_pred = mlp(xs[0])
+
+y_true = ys[0]
+
+
+loss = (Tensor(y_true, (), "", "") - y_pred) ** Tensor(2, (), "","")
+
+
+
+for n in mlp.parameters():
+    n.grad = 0
+
+loss.backward()
+
+quit()
 
 #x = Tensor([2.0, 3.0, -1.0])
 mlp = MLP(3, [4,4,1])
@@ -122,4 +124,4 @@ for i in range(100):
     loss.backward()
 
     for n in mlp.parameters():
-        n.data += -0.0001 * n.grad '''
+        n.data += -0.0001 * n.grad 

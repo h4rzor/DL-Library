@@ -23,8 +23,13 @@ class Neuron(Module):
     
     def __call__(self, x):
         res = Tensor(0, (), "")
+        #act = sum(xi*wi for xi, wi in zip(x, self.weight)) + self.bias
         for wi, xi in zip(self.weight, x):
-            res += (wi.data * xi)
+            if isinstance(xi, Tensor):
+                xi_data = xi.data#Tensor(xi, (xi, ), "","")
+                res += Tensor(wi.data * xi_data, (wi, xi), "","")
+            else:
+                res += Tensor(wi.data * xi, (wi, xi), "","")
         act = relu(res) if self.activation else res
         return act
     
@@ -53,7 +58,6 @@ class MLP(Module):
     def __call__(self, x):
         for layer in self.layers:
             x = layer(x)
-            #print(x)
         return x 
 
     def parameters(self):
